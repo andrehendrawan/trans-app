@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionController extends Controller
 {
@@ -108,5 +112,90 @@ class TransactionController extends Controller
         // return dd($transaction);
         // Return the generated PDF for download
         return $pdf->download('transaction_' . $transaction->id . '.pdf');
+    }
+
+    public function export(Request $request)
+    {
+        // Validate the date inputs
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        // Retrieve transactions based on the date filter
+        $transactions = Transaction::whereBetween('created_at', [$request->start_date, $request->end_date])->get();
+
+        // Create a new spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set header rows
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Name');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Product');
+        $sheet->setCellValue('E1', 'Price');
+        $sheet->setCellValue('F1', 'Quantity');
+        $sheet->setCellValue('G1', 'Total Price');
+        $sheet->setCellValue('H1', 'Date');
+
+        // Fill data rows
+        $row = 2; // Start from the second row
+        foreach ($transactions as $transaction) {
+            $sheet->setCellValue('A' . $row, $transaction->id);
+            $sheet->setCellValue('B' . $row, $transaction->name);
+            $sheet->setCellValue('C' . $row, $transaction->email);
+            $sheet->setCellValue('D' . $row, $transaction->product);
+            $sheet->setCellValue('E' . $row, $transaction->price);
+            $sheet->setCellValue('F' . $row, $transaction->quantity);
+            $sheet->setCellValue('G' . $row, $transaction->total_price);
+            $sheet->setCellValue('H' . $row, $transaction->created_at->format('Y-m-d'));
+            $row++;
+        }
+
+        // Prepare response for download
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        // Set headers
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="sales_report.xlsx"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    public function sendEmail($id)
+    {
+        // Fetch the transaction
+        $transaction = Transaction::findOrFail($id);
+
+        // Generate the PDF (assuming you are using DomPDF)
+        $pdf = PDF::loadView('page.transaction.pdf', compact('transaction'));
+
+        // Save the PDF temporarily
+        $pdfPath = storage_path('app/public/') . 'transaction_' . $transaction->id . '.pdf';
+        $pdf->save($pdfPath);
+
+        // Prepare email data
+        $data = [
+            'name' => $transaction->name,
+            'email' => $transaction->email,
+            'transaction' => $transaction
+        ];
+
+        // Send email
+        Mail::send('page.emails.transaction', $data, function ($message) use ($transaction, $pdfPath) {
+            $message->to($transaction->email)
+                    ->subject('Your Transaction Receipt')
+                    ->attach($pdfPath);
+        });
+
+        // Delete the temporary PDF file
+        unlink($pdfPath);
+
+        return redirect()->back()->with('success', 'Email sent successfully to ' . $transaction->email);
     }
 }

@@ -14,7 +14,13 @@
     <!-- Action Buttons -->
     <div class="d-flex justify-content-between mb-3">
         <a href="{{ route('transactions.create') }}" class="btn btn-success">Add New Transaction</a>
-        <button class="btn btn-info" id="convert-excel-btn">Convert to Excel</button>
+        <!-- Form for converting to Excel -->
+        <form id="excel-form" action="{{ route('transactions.export') }}" method="GET">
+            <!-- Add inputs for the date filters -->
+            <input type="date" name="start_date" id="start_date" required>
+            <input type="date" name="end_date" id="end_date" required>
+            <button type="submit" class="btn btn-info">Convert to Excel</button>
+        </form>
     </div>
 
     <!-- Table -->
@@ -50,6 +56,10 @@
                                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                             </form>
                             <a href="{{ route('transactions.convertToPDF', $transaction->id) }}" class="btn btn-sm btn-warning">Convert PDF</a>
+                            <form action="{{ route('transactions.email', $transaction->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-info">Send Email</button>
+                            </form>
                         </td>
                     </tr>
                 @endforeach
