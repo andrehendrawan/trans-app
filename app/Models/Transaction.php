@@ -21,5 +21,11 @@ class Transaction extends Model
         'price',
         'quantity',
         'total_price',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

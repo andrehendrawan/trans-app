@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('price', 12, 2);
             $table->integer('quantity');
             $table->decimal('total_price', 16, 2);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -9,7 +9,7 @@
         @csrf
         @method('PUT')
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="name">Name</label>
             <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $transaction->name) }}" required>
             @error('name')
@@ -17,7 +17,7 @@
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="email">Email</label>
             <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $transaction->email) }}" required>
             @error('email')
@@ -25,7 +25,7 @@
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="product">Product</label>
             <input type="text" class="form-control" id="product" name="product" value="{{ old('product', $transaction->product) }}" required>
             @error('product')
@@ -33,7 +33,7 @@
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="price">Price</label>
             <input type="number" step="0.01" class="form-control" id="price" name="price" value="{{ old('price', $transaction->price) }}" required>
             @error('price')
@@ -41,7 +41,7 @@
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="quantity">Quantity</label>
             <input type="number" class="form-control" id="quantity" name="quantity" value="{{ old('quantity', $transaction->quantity) }}" required>
             @error('quantity')
@@ -49,7 +49,7 @@
             @enderror
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <label for="total_price">Total Price</label>
             <input type="text" class="form-control" id="total_price" name="total_price" value="{{ 'Rp ' . number_format($transaction->total_price, 0, ',', '.') }}" readonly>
         </div>

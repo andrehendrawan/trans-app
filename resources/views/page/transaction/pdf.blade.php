@@ -53,6 +53,10 @@
             <th>Total Price</th>
             <td>{{ formatRupiah($transaction->total_price) }}</td>
         </tr>
+        <tr>
+            <th>Issued By</th>
+            <td>{{ $transaction->user->name }}</td>
+        </tr>
     </table>
 </body>
 </html>

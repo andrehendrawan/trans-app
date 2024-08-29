@@ -35,6 +35,7 @@
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Total Price</th>
+                    <th>Issued By</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -48,6 +49,7 @@
                         <td>{{ formatRupiah($transaction->price)}}</td>
                         <td>{{ $transaction->quantity }}</td>
                         <td>{{ formatRupiah($transaction->total_price) }}</td>
+                        <td>{{ $transaction->user->name }}</td>
                         <td>
                             <a href="{{ route('transactions.edit', $transaction->id) }}" class="btn btn-sm btn-primary">Edit</a>
                             <form action="{{ route('transactions.destroy', $transaction->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
